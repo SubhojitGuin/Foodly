@@ -1,11 +1,16 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlmodel import SQLModel, Field, Session, create_engine, select
+from rag import recipe_generator_rag
 import os
 
 # Initialize FastAPI app
 app = FastAPI()
+
+# Initialize Jinja2 templates
+templates = Jinja2Templates(directory="Foodly_extracted")
 
 # Database configuration
 db_file = "foodly.db"
@@ -135,6 +140,8 @@ async def ai_recipe_generator():
 async def ai_recipe_generator_post(request: Request):
     form_data = await request.form()
     ingredients = form_data.get("ingredients")
+    recipe_response = recipe_generator_rag(input_variables={"ingredients": ingredients})
+    return templates.TemplateResponse(request=request, name="ai-recipe-generator-response.html", context={"response": recipe_response})
 
 
 # Run the application
