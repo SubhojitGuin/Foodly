@@ -1,10 +1,9 @@
-<!-- Modernized Recipe Sharing Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Sharing - Foodly</title>
+    <title>Smart Grocery List - Foodly</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -67,12 +66,12 @@
         }
         .content h2 {
             color: #38bdf8;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             font-size: 1.8rem;
         }
         .content textarea {
             width: 95%;
-            height: 150px;
+            height: 100px;
             padding: 10px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
@@ -103,12 +102,23 @@
             padding: 15px;
             font-size: 0.9rem;
         }
+        #servings {
+            width: 95%;
+            height: 20px;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Recipe Sharing</h1>
-        <p>Share your favorite recipes with friends and family.</p>
+        <h1>Smart Grocery List</h1>
+        <p>Create efficient shopping lists for your meal plans.</p>
     </header>
     <nav>
         <a href="/">Home</a>
@@ -117,10 +127,15 @@
     </nav>
     <main>
         <div class="content">
-            <h2>Share Your Recipe</h2>
-            <textarea placeholder="Write your recipe here..."></textarea><br>
-            <button>Share Recipe</button>
-            <p class="hint">Share your recipe via email or copy the link to send to others.</p>
+            <h2>Generate Your Grocery List</h2>
+            <form action="/smart-grocery-list" method="post">
+                <label for="grocery">Recipes or Ingredients:</label>
+                <textarea id="grocery" name="grocery" placeholder="Enter your recipes or ingredients along with their quantities per serving here..." required></textarea><br>
+                <textarea type="number" id="servings" name="servings" placeholder="Number of servings" required></textarea><br>
+                <textarea type="text" id="note" name="note" placeholder="Additional notes (e.g., dietary restrictions, allergies)"></textarea><br>
+                <button>Generate List</button>
+            </form>
+            <p class="hint">Provide recipes or ingredients, and we'll generate a grocery list for you.</p>
         </div>
     </main>
     <footer>

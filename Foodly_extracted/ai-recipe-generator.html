@@ -71,7 +71,7 @@
             font-size: 1.8rem;
         }
         .content textarea {
-            width: 100%;
+            width: 95%;
             padding: 10px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
@@ -119,11 +119,9 @@
             <h2>Enter Your Ingredients</h2>
             <form action="/ai-recipe-generator" method="post">
                 <label for="ingredients">Ingredients:</label>
-                <textarea id="ingredients" placeholder="e.g., eggs, milk, flour..."></textarea><br>
+                <textarea type="text" id="ingredients" name="ingredients" placeholder="e.g., eggs, milk, flour..."></textarea><br>
                 <button>Generate Recipes</button>
             </form>
-            <!-- <textarea placeholder="e.g., eggs, milk, flour..."></textarea><br>
-            <button>Generate Recipes</button> -->
             <p class="hint">AI will suggest recipes based on the ingredients you provide.</p>
         </div>
     </main>

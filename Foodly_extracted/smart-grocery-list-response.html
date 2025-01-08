@@ -1,9 +1,10 @@
+<!-- Modernized About Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Grocery List - Foodly</title>
+    <title>About - Foodly</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -61,7 +62,7 @@
             padding: 20px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             text-align: center;
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
         }
         .content h2 {
@@ -69,31 +70,11 @@
             margin-bottom: 20px;
             font-size: 1.8rem;
         }
-        .content textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+        .content p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 1.1rem;
             margin-bottom: 20px;
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-size: 1rem;
-        }
-        .content button {
-            background: linear-gradient(90deg, #2563eb, #1e3a8a);
-            color: #f8fafc;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        .content button:hover {
-            background: linear-gradient(90deg, #38bdf8, #2563eb);
-            transform: scale(1.05);
         }
         footer {
             background-color: #1e293b;
@@ -102,7 +83,14 @@
             padding: 15px;
             font-size: 0.9rem;
         }
+        /* md-block { 
+            white-space: pre;
+            font-family: monospace;
+            font-size: 1.2rem;
+        } */
     </style>
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+
 </head>
 <body>
     <header>
@@ -116,10 +104,10 @@
     </nav>
     <main>
         <div class="content">
-            <h2>Generate Your Grocery List</h2>
-            <textarea placeholder="Enter your recipes or ingredients here..."></textarea><br>
-            <button>Generate List</button>
-            <p class="hint">Provide recipes or ingredients, and we'll generate a grocery list for you.</p>
+            <h2>Your Grocery List</h2>
+            <p>Here is your grocery list:</p>
+            <md-block>{{ response }}</md-block>
+            
         </div>
     </main>
     <footer>

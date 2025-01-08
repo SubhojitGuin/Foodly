@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import SQLModel, Field, Session, create_engine, select
-from rag import recipe_generator_rag
+from rag import recipe_generator_rag, grocery_list_rag
 import os
 
 # Initialize FastAPI app
@@ -55,7 +55,6 @@ app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 async def read_index():
     index_path = os.path.join(frontend_path, "index.html")  # Adjusted to match renamed files
     if os.path.exists(index_path):
-        print("Found index.html")
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="Index file not found")
 
@@ -103,7 +102,6 @@ async def read_index():
 async def contact():
     index_path = os.path.join(frontend_path, "contact.html")  # Adjusted to match renamed files
     if os.path.exists(index_path):
-        print("Found contact.html")
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="Contact file not found")
 
@@ -111,7 +109,6 @@ async def contact():
 async def about():
     index_path = os.path.join(frontend_path, "about.html")  # Adjusted to
     if os.path.exists(index_path):
-        print("Found about.html")
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="About file not found")
 
@@ -132,7 +129,6 @@ async def contact_post(request: Request):
 async def ai_recipe_generator():
     index_path = os.path.join(frontend_path, "ai-recipe-generator.html") # Adjusted to match renamed files
     if os.path.exists(index_path):
-        print("Found ai-recipe-generator.html")
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="AI Recipe Generator file not found")
 
@@ -143,6 +139,22 @@ async def ai_recipe_generator_post(request: Request):
     recipe_response = recipe_generator_rag(input_variables={"ingredients": ingredients})
     return templates.TemplateResponse(request=request, name="ai-recipe-generator-response.html", context={"response": recipe_response})
 
+@app.get("/smart-grocery-list")
+async def smart_grocery_list():
+    index_path = os.path.join(frontend_path, "smart-grocery-list.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Smart Grocery List file not found")
+
+@app.post("/smart-grocery-list")
+async def smart_grocery_list_post(request: Request):
+    form_data = await request.form()
+    grocery_list = form_data.get("grocery")
+    servings = form_data.get("servings")
+    note = form_data.get("note")
+    input_variables = {"grocery_list": grocery_list, "servings": servings, "note": note}
+    response = grocery_list_rag(input_variables)
+    return templates.TemplateResponse(request=request, name="smart-grocery-list-response.html", context={"response": response})
 
 # Run the application
 if __name__ == "__main__":
