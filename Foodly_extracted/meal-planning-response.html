@@ -1,10 +1,10 @@
-<!-- Modernized Recipe Sharing Page -->
+<!-- Modernized About Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Sharing - Foodly</title>
+    <title>About - Foodly</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -62,39 +62,19 @@
             padding: 20px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
             text-align: center;
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
         }
         .content h2 {
             color: #38bdf8;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             font-size: 1.8rem;
         }
-        .content textarea {
-            width: 95%;
-            height: 150px;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+        .content p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 1.1rem;
             margin-bottom: 20px;
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-size: 1rem;
-        }
-        .content button {
-            background: linear-gradient(90deg, #2563eb, #1e3a8a);
-            color: #f8fafc;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.3s, transform 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        .content button:hover {
-            background: linear-gradient(90deg, #38bdf8, #2563eb);
-            transform: scale(1.05);
         }
         footer {
             background-color: #1e293b;
@@ -103,12 +83,19 @@
             padding: 15px;
             font-size: 0.9rem;
         }
+        /* md-block { 
+            white-space: pre;
+            font-family: monospace;
+            font-size: 1.2rem;
+        } */
     </style>
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+
 </head>
 <body>
     <header>
-        <h1>Recipe Sharing</h1>
-        <p>Share your favorite recipes with friends and family.</p>
+        <h1>Meal Planning</h1>
+        <p>Organize your meals for the week or month.</p>
     </header>
     <nav>
         <a href="/">Home</a>
@@ -117,16 +104,9 @@
     </nav>
     <main>
         <div class="content">
-            <h2>Share Your Recipe</h2>
-            <form action="/recipe-sharing" method="post">
-                <input type="text" placeholder="Recipe Name" required><br>
-                <input type="email" placeholder="Your Email" required><br>
-                <textarea placeholder="Write your recipe here..."></textarea><br>
-                <button>Share Recipe</button>
-            </form>
-            <textarea placeholder="Write your recipe here..."></textarea><br>
-            <button>Share Recipe</button>
-            <p class="hint">Share your recipe via email or copy the link to send to others.</p>
+            <h2>Your Meal Plan</h2>
+            <p>Here is your meal plan:</p>
+            <md-block>{{ response }}</md-block>
         </div>
     </main>
     <footer>

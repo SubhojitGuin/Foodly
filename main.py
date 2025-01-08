@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import SQLModel, Field, Session, create_engine, select
-from rag import recipe_generator_rag, grocery_list_rag
+from rag import recipe_generator_rag, grocery_list_rag, meal_planning_rag
 import os
 
 # Initialize FastAPI app
@@ -57,46 +57,6 @@ async def read_index():
     if os.path.exists(index_path):
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="Index file not found")
-
-# API Endpoints
-# @app.post("/api/users")
-# def create_user(user: User):
-#     with Session(engine) as session:
-#         existing_user = session.exec(select(User).where(User.email == user.email)).first()
-#         if existing_user:
-#             raise HTTPException(status_code=400, detail="User already exists")
-#         session.add(user)
-#         session.commit()
-#         session.refresh(user)
-#     return user
-
-# @app.post("/api/recipes")
-# def create_recipe(recipe: Recipe):
-#     with Session(engine) as session:
-#         session.add(recipe)
-#         session.commit()
-#         session.refresh(recipe)
-#     return recipe
-
-# @app.get("/api/recipes")
-# def get_recipes():
-#     with Session(engine) as session:
-#         recipes = session.exec(select(Recipe)).all()
-#     return recipes
-
-# @app.post("/api/grocery-items")
-# def add_grocery_item(item: GroceryItem):
-#     with Session(engine) as session:
-#         session.add(item)
-#         session.commit()
-#         session.refresh(item)
-#     return item
-
-# @app.get("/api/grocery-items")
-# def get_grocery_items():
-#     with Session(engine) as session:
-#         items = session.exec(select(GroceryItem)).all()
-#     return items
 
 @app.get("/contact")
 async def contact():
@@ -155,6 +115,33 @@ async def smart_grocery_list_post(request: Request):
     input_variables = {"grocery_list": grocery_list, "servings": servings, "note": note}
     response = grocery_list_rag(input_variables)
     return templates.TemplateResponse(request=request, name="smart-grocery-list-response.html", context={"response": response})
+
+@app.get("/meal-planning")
+async def meal_planning():
+    index_path = os.path.join(frontend_path, "meal-planning.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Meal Planning file not found")
+
+@app.post("/meal-planning")
+async def meal_planning_post(request: Request):
+    form_data = await request.form()
+    allergies = form_data.get("allergies")
+    dietary_restrictions = form_data.get("dietary-restrictions")
+    health_conditions = form_data.get("health-conditions")
+    time_constraints = form_data.get("time-constraints")
+    cooking_skills = form_data.get("cooking-skills")
+    budget = form_data.get("budget")
+    taste_preferences = form_data.get("taste-preferences")
+    meal_plan = meal_planning_rag(input_variables={"allergies": allergies, "dietary_restrictions": dietary_restrictions, "health_conditions": health_conditions, "time_constraints": time_constraints, "cooking_skills": cooking_skills, "budget": budget, "taste_preferences": taste_preferences})
+    return templates.TemplateResponse(request=request, name="meal-planning-response.html", context={"response": meal_plan})
+
+@app.get("/recipe-sharing")
+async def recipe_sharing():
+    index_path = os.path.join(frontend_path, "recipe-sharing.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Recipe Sharing file not found")
 
 # Run the application
 if __name__ == "__main__":

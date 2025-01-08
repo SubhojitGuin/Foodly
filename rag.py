@@ -46,3 +46,26 @@ def grocery_list_rag(input_variables):
     chain = prompt | llm | StrOutputParser()
     response = chain.invoke(input_variables)
     return response
+
+def meal_planning_rag(input_variables):
+    prompt_template = """
+        Provide a meal planning based on the following factors:
+        
+        Allergies/Intolerances: {allergies}
+        
+        Dietary Restrictions: {dietary_restrictions}
+        
+        Health Conditions: {health_conditions}
+        
+        Time Constraints: {time_constraints}
+        
+        Cooking skills: {cooking_skills}
+        
+        Grocery Budget: {budget}
+        
+        Taste preferences: {taste_preferences}
+    """
+    prompt = PromptTemplate(template=prompt_template, input_variables={"allergies", "dietary_restrictions", "health_conditions", "time_constraints", "cooking_skills", "budget", "taste_preferences"})
+    chain = prompt | llm | StrOutputParser()
+    response = chain.invoke(input_variables)
+    return response
