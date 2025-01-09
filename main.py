@@ -151,6 +151,7 @@ async def ai_recipe_generator_post(request: Request):
     form_data = await request.form()
     ingredients = form_data.get("ingredients")
     recipe_response = recipe_generator_rag(input_variables={"ingredients": ingredients})
+    print(recipe_response)
     return templates.TemplateResponse(request=request, name="ai-recipe-generator-response.html", context={"response": recipe_response})
 
 @app.get("/smart-grocery-list")
@@ -196,6 +197,8 @@ async def recipe_sharing():
     if os.path.exists(index_path):
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="Recipe Sharing file not found")
+
+
 
 # Run the application
 if __name__ == "__main__":
