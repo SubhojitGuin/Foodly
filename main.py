@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlmodel import SQLModel, Field, Session, create_engine, select
@@ -51,12 +51,66 @@ SQLModel.metadata.create_all(engine)
 frontend_path = "./Foodly_extracted"  # Path to the frontend files
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
-@app.get("/", response_class=HTMLResponse)
-async def read_index():
+@app.get("/")
+async def home(request: Request):
+    return RedirectResponse(url="/login", status_code=302)
+
+@app.get("/home", response_class=HTMLResponse)
+async def read_index(request: Request):
     index_path = os.path.join(frontend_path, "index.html")  # Adjusted to match renamed files
     if os.path.exists(index_path):
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="Index file not found")
+
+@app.get("/login")
+async def login(request: Request):
+    index_path = os.path.join(frontend_path, "login.html")  # Adjusted to match renamed files
+    if os.path.exists(index_path):
+        return templates.TemplateResponse(request=request, name="login.html", context={"response": ""})
+    raise HTTPException(status_code=404, detail="Login file not found")
+
+@app.post("/login")
+async def login_user(request: Request):
+    form_data = await request.form()
+    username = form_data.get("username")
+    password = form_data.get("password")
+    with Session(engine) as session:
+        user = session.exec(select(User).where(User.username == username)).first()
+        if user and user.password == password:
+            return RedirectResponse(url="/home", status_code=302)
+    return templates.TemplateResponse(request=request, name="login.html", context={"response": "Invalid username or password"})
+
+@app.get("/signup")
+async def register(request: Request):
+    index_path = os.path.join(frontend_path, "signup.html")
+    if os.path.exists(index_path):
+        return templates.TemplateResponse(request=request, name="signup.html", context={"response": ""})
+    raise HTTPException(status_code=404, detail="Signup file not found")
+
+@app.post("/signup")
+async def register_user(request: Request):
+    form_data = await request.form()
+    username = form_data.get("username")
+    email = form_data.get("email")
+    password = form_data.get("password")
+    with Session(engine) as session:
+        # Check if username already exists
+        user_exists = session.exec(select(User).where(User.username == username)).first()
+        if user_exists:
+            return templates.TemplateResponse(request=request, name="signup.html", context={"response": "Username already exists"})
+        
+        # Check if email already exists
+        email_exists = session.exec(select(User).where(User.email == email)).first()
+        if email_exists:
+            return templates.TemplateResponse(request=request, name="signup.html", context={"response": "Email already exists"})
+        
+        # Create new user
+        user = User(username=username, email=email, password=password)
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+
+    return RedirectResponse(url="/login", status_code=302)
 
 @app.get("/contact")
 async def contact():

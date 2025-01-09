@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recipe Sharing - Foodly</title>
+    <title>Login - Foodly</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -44,24 +44,20 @@
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            max-width: 400px;
             width: 100%;
+            text-align: center;
         }
         .form-container h2 {
             color: #38bdf8;
             margin-bottom: 20px;
             font-size: 1.8rem;
-            text-align: center;
         }
         .form-container form {
             display: flex;
             flex-direction: column;
         }
-        .form-container label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .form-container input, .form-container textarea {
+        .form-container input {
             margin-bottom: 15px;
             padding: 10px;
             border: 2px solid #2563eb;
@@ -70,7 +66,7 @@
             color: #f8fafc;
             font-size: 1rem;
         }
-        .form-container input:focus, .form-container textarea:focus {
+        .form-container input:focus {
             outline: none;
             border-color: #38bdf8;
         }
@@ -88,6 +84,15 @@
             background: #38bdf8;
             transform: scale(1.05);
         }
+        .form-container .signup-link {
+            margin-top: 10px;
+            color: #38bdf8;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        .form-container .signup-link:hover {
+            text-decoration: underline;
+        }
         footer {
             background-color: #1e293b;
             color: #94a3b8;
@@ -95,43 +100,38 @@
             padding: 15px;
             font-size: 0.9rem;
         }
+        .error {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 12px;
+            color: #f87171; /* Dark red text */
+            border-radius: 8px;
+            font-family: 'Courier New', monospace; /* Monospaced font for log look */
+            font-size: 1.1rem;
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Share Your Recipe</h1>
-        <p>Let others discover and enjoy your favorite dishes.</p>
+        <h1>Welcome Back to Foodly</h1>
+        <p>Log in to access your personalized cooking experience.</p>
     </header>
     <main>
         <div class="form-container">
-            <h2>Recipe Submission Form</h2>
-            <form action="/submit-recipe" method="POST">
-                <label for="recipe-title">Recipe Title *</label>
-                <input type="text" id="recipe-title" name="recipe_title" placeholder="Enter the recipe title" required>
-                
-                <label for="image-url">Image URL (Optional)</label>
-                <input type="url" id="image-url" name="image_url" placeholder="Enter a link to an image of your dish">
-
-                <label for="ingredients">Ingredients *</label>
-                <textarea id="ingredients" name="ingredients" rows="4" placeholder="List all ingredients with measurements" required></textarea>
-                
-                <label for="instructions">Instructions *</label>
-                <textarea id="instructions" name="instructions" rows="6" placeholder="Provide step-by-step instructions" required></textarea>
-                
-                <label for="prep-time">Prep Time (Optional)</label>
-                <input type="text" id="prep-time" name="prep_time" placeholder="E.g., 15 minutes">
-
-                <label for="cook-time">Cook Time (Optional)</label>
-                <input type="text" id="cook-time" name="cook_time" placeholder="E.g., 30 minutes">
-
-                <label for="servings">Servings (Optional)</label>
-                <input type="number" id="servings" name="servings" placeholder="E.g., 4">
-
-                <label for="dietary-notes">Dietary Notes (Optional)</label>
-                <input type="text" id="dietary-notes" name="dietary_notes" placeholder="E.g., Vegan, Gluten-Free">
-
-                <button type="submit">Submit Recipe</button>
+            <h2>Login</h2>
+            <form action="/login" method="POST">
+                <input type="text" id="username" name="username" placeholder="Email" required>
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
             </form>
+            {% if response %}
+            <p class="error">{{ response }}</p>
+            {% endif %}
+            <br>
+            <a href="/signup" class="signup-link">Don't have an account? Sign up here</a>
         </div>
     </main>
     <footer>
