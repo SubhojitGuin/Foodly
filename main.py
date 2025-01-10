@@ -27,10 +27,15 @@ class User(SQLModel, table=True):
 class Recipe(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     title: str
+    image_url: str = None
     description: str = None
     ingredients: str
     instructions: str
-    user_id: int
+    prep_time: str = None
+    cook_time: str = None
+    servings: str = None
+    dietary_notes: str = None
+    user_id: int = Field(default=None, foreign_key="user.id")
 
 class GroceryItem(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
@@ -169,6 +174,7 @@ async def smart_grocery_list_post(request: Request):
     note = form_data.get("note")
     input_variables = {"grocery_list": grocery_list, "servings": servings, "note": note}
     response = grocery_list_rag(input_variables)
+    print(response)
     return templates.TemplateResponse(request=request, name="smart-grocery-list-response.html", context={"response": response})
 
 @app.get("/meal-planning")
@@ -192,13 +198,69 @@ async def meal_planning_post(request: Request):
     return templates.TemplateResponse(request=request, name="meal-planning-response.html", context={"response": meal_plan})
 
 @app.get("/recipe-sharing")
-async def recipe_sharing():
+async def recipe_sharing(request: Request):
     index_path = os.path.join(frontend_path, "recipe-sharing.html")
     if os.path.exists(index_path):
         return FileResponse(index_path, media_type="text/html")
     raise HTTPException(status_code=404, detail="Recipe Sharing file not found")
 
+@app.post("/recipe-sharing")
+async def recipe_sharing_post(request: Request):
+    form_data = await request.form()
+    recipe_title = form_data.get("recipe_title")
+    image_url = form_data.get("imageurl")
+    description = form_data.get("description")
+    ingredients = form_data.get("ingredients")
+    instructions = form_data.get("instructions")
+    prep_time = form_data.get("preptime")
+    cook_time = form_data.get("cooktime")
+    servings = form_data.get("servings")
+    dietary_notes = form_data.get("dietarynotes")
+    username = form_data.get("username")
 
+    with Session(engine) as session:
+        
+        user = session.exec(select(User).where(User.username == username)).first()
+        if user:
+            print(recipe_title)
+            recipe = Recipe(
+                title=recipe_title,
+                image_url=image_url,
+                description=description,
+                ingredients=ingredients,
+                instructions=instructions,
+                prep_time=prep_time,
+                cook_time=cook_time,
+                servings=servings,
+                dietary_notes=dietary_notes,
+                user_id=user.id
+            )
+            session.add(recipe)
+            session.commit()
+            session.refresh(recipe)
+
+            return RedirectResponse(url=f"/recipes-sharing-blog/{recipe.id}", status_code=302)
+        else:
+            return templates.TemplateResponse(request=request, name="recipe-sharing.html", context={"response": "User not found"})
+
+@app.get("/recipes-sharing-blog/{recipe_id}")
+async def recipe_sharing_blog(request: Request, recipe_id: int):
+    with Session(engine) as session:
+        recipe = session.exec(select(Recipe).where(Recipe.id == recipe_id)).first()
+        user = session.exec(select(User).where(User.id == recipe.user_id)).first()
+        if recipe:
+            return templates.TemplateResponse(request=request, name="recipe-sharing-blog.html", context={
+                "recipe_title": recipe.title.replace("\n", "<br>"),
+                "image_url": recipe.image_url,
+                "description": recipe.description.replace("\n", "<br>"),
+                "ingredients": recipe.ingredients.replace("\n", "<br>"),
+                "instructions": recipe.instructions.replace("\n", "<br>"),
+                "prep_time": recipe.prep_time,
+                "cook_time": recipe.cook_time,
+                "servings": recipe.servings,
+                "dietary_notes": recipe.dietary_notes.replace("\n", "<br>"),
+                "author": user.username
+            })
 
 # Run the application
 if __name__ == "__main__":

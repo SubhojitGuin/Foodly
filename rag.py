@@ -15,7 +15,11 @@ def recipe_generator_rag(input_variables):
         Answer the following question in a detailed manner providing each and every step. Include all the necessary details. You must include the ingredients and its quantity, the cooking time, the cooking method, and any other relevant information. You may also include extra ingredients if you think it will enhance the recipe.
         Think step by step before providing an answer, and make sure to provide all the details.
         Always return the response in HTML body format.
-        Do not include ''', * and <html>, <body>, <li> tags in the response. Always mention the ingredients along with their quantities. Use <br> to differentiate the points.\n
+        Always mention the ingredients along with their quantities. 
+        Use <h3> for headings. 
+        Do not include ''', *, html, <html>, <body>, <li> tags in the response.
+        Always mention the ingredients along with their quantities.
+        Use <br> to differentiate the points.\n
         \n\n
 
         Question: Generate a comprehensive recipe based on the following ingredients:
@@ -24,7 +28,7 @@ def recipe_generator_rag(input_variables):
     prompt = PromptTemplate(template=prompt_template, input_variables={"ingredients"})
     chain = prompt | llm | StrOutputParser()
     response = chain.invoke(input_variables)
-    return response
+    return response.replace("```", "").replace("html", "")
 
 def grocery_list_rag(input_variables):
     # prompt_template = """
@@ -40,6 +44,12 @@ def grocery_list_rag(input_variables):
     #     Servings: {servings}
     # """
     prompt_template = """
+        Always return the response in HTML body format.
+        Always mention the ingredients along with their quantities. 
+        Use <h3> for headings. 
+        Do not include ''', *, html, <html>, <body>, <li> tags in the response.
+        Use <br> to differentiate the points.
+
         Provide a grocery list for the following recipe name:
         Recipe: {grocery_list}
         Servings: {servings}
@@ -48,10 +58,16 @@ def grocery_list_rag(input_variables):
     prompt = PromptTemplate(template=prompt_template, input_variables={"grocery_list", "servings", "note"})
     chain = prompt | llm | StrOutputParser()
     response = chain.invoke(input_variables)
-    return response
+    return response.replace("```", "").replace("html", "")
 
 def meal_planning_rag(input_variables):
     prompt_template = """
+        Always return the response in HTML body format.
+        Always mention the ingredients along with their quantities. 
+        Use <h3> for headings. 
+        Do not include ''', *, html, <html>, <body>, <li> tags in the response.
+        Use <br> to differentiate the points.
+
         Provide a meal planning based on the following factors:
         
         Allergies/Intolerances: {allergies}
@@ -71,4 +87,4 @@ def meal_planning_rag(input_variables):
     prompt = PromptTemplate(template=prompt_template, input_variables={"allergies", "dietary_restrictions", "health_conditions", "time_constraints", "cooking_skills", "budget", "taste_preferences"})
     chain = prompt | llm | StrOutputParser()
     response = chain.invoke(input_variables)
-    return response
+    return response.replace("```", "").replace("html", "")

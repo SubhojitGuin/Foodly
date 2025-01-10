@@ -105,12 +105,15 @@
     <main>
         <div class="form-container">
             <h2>Recipe Submission Form</h2>
-            <form action="/submit-recipe" method="POST">
-                <label for="recipe-title">Recipe Title *</label>
-                <input type="text" id="recipe-title" name="recipe_title" placeholder="Enter the recipe title" required>
+            <form action="/recipe-sharing" method="POST">
+                <label for="recipe_title">Recipe Title *</label>
+                <input type="text" id="recipe_title" name="recipe_title" placeholder="Enter the recipe title" required>
                 
-                <label for="image-url">Image URL (Optional)</label>
-                <input type="url" id="image-url" name="image_url" placeholder="Enter a link to an image of your dish">
+                <label for="imageurl">Image URL (Optional)</label>
+                <input type="url" id="imageurl" name="imageurl" placeholder="Enter a link to an image of your dish">
+
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" rows="4" placeholder="Briefly describe your dish" required></textarea>
 
                 <label for="ingredients">Ingredients *</label>
                 <textarea id="ingredients" name="ingredients" rows="4" placeholder="List all ingredients with measurements" required></textarea>
@@ -118,17 +121,20 @@
                 <label for="instructions">Instructions *</label>
                 <textarea id="instructions" name="instructions" rows="6" placeholder="Provide step-by-step instructions" required></textarea>
                 
-                <label for="prep-time">Prep Time (Optional)</label>
-                <input type="text" id="prep-time" name="prep_time" placeholder="E.g., 15 minutes">
+                <label for="preptime">Prep Time (Optional)</label>
+                <input type="text" id="preptime" name="preptime" placeholder="E.g., 15 minutes">
 
-                <label for="cook-time">Cook Time (Optional)</label>
-                <input type="text" id="cook-time" name="cook_time" placeholder="E.g., 30 minutes">
+                <label for="cooktime">Cook Time (Optional)</label>
+                <input type="text" id="cooktime" name="cooktime" placeholder="E.g., 30 minutes">
 
                 <label for="servings">Servings (Optional)</label>
                 <input type="number" id="servings" name="servings" placeholder="E.g., 4">
 
-                <label for="dietary-notes">Dietary Notes (Optional)</label>
-                <input type="text" id="dietary-notes" name="dietary_notes" placeholder="E.g., Vegan, Gluten-Free">
+                <label for="dietarynotes">Dietary Notes (Optional)</label>
+                <input type="text" id="dietarynotes" name="dietarynotes" placeholder="E.g., Vegan, Gluten-Free">
+
+                <label for="username">Your UserName *</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
 
                 <button type="submit">Submit Recipe</button>
             </form>

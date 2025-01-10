@@ -1,11 +1,11 @@
-<!-- Modernized About Page -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - Foodly</title>
+    <title>Recipe Sharing - Preview</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=67814233f82317001d89e649&product=inline-share-buttons' async='async'></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -56,25 +56,37 @@
             padding: 20px;
             flex-direction: column;
         }
-        .content {
+        .preview-container {
             background: #1e293b;
             border-radius: 12px;
             padding: 20px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            text-align: center;
             max-width: 800px;
             width: 100%;
         }
-        .content h2 {
+        .preview-container h2 {
             color: #38bdf8;
             margin-bottom: 20px;
             font-size: 1.8rem;
+            text-align: center;
         }
-        .content p {
-            color: #cbd5e1;
-            line-height: 1.6;
-            font-size: 1.1rem;
+        .preview-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
             margin-bottom: 20px;
+        }
+        .preview-container .recipe-details {
+            margin-bottom: 20px;
+        }
+        .preview-container .recipe-details h3 {
+            margin: 10px 0;
+            color: #38bdf8;
+            font-size: 1.4rem;
+        }
+        .preview-container .recipe-details p {
+            margin: 5px 0;
+            line-height: 1.6;
         }
         footer {
             background-color: #1e293b;
@@ -84,13 +96,11 @@
             font-size: 0.9rem;
         }
     </style>
-    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
-
 </head>
 <body>
     <header>
-        <h1>Meal Planning</h1>
-        <p>Organize your meals for the week or month.</p>
+        <h1>Recipe Preview</h1>
+        <p>Review your recipe before sharing it with others.</p>
     </header>
     <nav>
         <a href="/home">Home</a>
@@ -98,11 +108,35 @@
         <a href="/contact">Contact</a>
     </nav>
     <main>
-        <div class="content">
-            <h2>Your Meal Plan</h2>
-            <p>Here is your meal plan:</p>
-            <md-block>{{ response|safe }}</md-block>
+        <div class="preview-container">
+            <h2>{{ recipe_title | safe }}</h2>
+            
+            {% if image_url %}
+                <img src="{{ image_url }}" alt="Recipe Image">
+            {% endif %}
+            <div class="recipe-details">
+                <h3>Written by</h3>
+                <p>{{ author | safe }}</p>
+
+                <h3>Description</h3>
+                <p>{{ description | safe }}</p>
+
+                <h3>Ingredients</h3>
+                <p>{{ ingredients | safe }}</p>
+
+                <h3>Instructions</h3>
+                <p>{{ instructions | safe }}</p>
+
+                <h3>Additional Information</h3>
+                <p>
+                    {% if prep_time %}<strong>Prep Time:</strong> {{ prep_time }}<br>{% endif %}
+                    {% if cook_time %}<strong>Cook Time:</strong> {{ cook_time }}<br>{% endif %}
+                    {% if servings %}<strong>Servings:</strong> {{ servings }}<br>{% endif %}
+                    {% if dietary_notes %}<strong>Dietary Notes:</strong> {{ dietary_notes }}{% endif %}
+                </p>
+            </div>
         </div>
+        <div class="sharethis-inline-share-buttons"></div>
     </main>
     <footer>
         <p>&copy; 2024 Foodly. All rights reserved.</p>

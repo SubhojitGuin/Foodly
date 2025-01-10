@@ -106,7 +106,9 @@
         <div class="content">
             <h2>Your Grocery List</h2>
             <p>Here is your grocery list:</p>
-            <md-block>{{ response }}</md-block>
+            <!-- <md-block> -->
+            {{ response|safe }}
+            <!-- </md-block> -->
             
         </div>
     </main>
