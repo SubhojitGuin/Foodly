@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - Foodly</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(90deg, #2563eb, #1e3a8a);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #f8fafc;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #1e293b;
+            padding: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        nav a {
+            color: #f8fafc;
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+        nav a:hover {
+            color: #38bdf8;
+        }
+        main {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+        }
+        .content {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+            margin: auto;
+        }
+        .content h2 {
+            color: #38bdf8;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .content p {
+            color: #cbd5e1;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .grocery-list {
+            margin-top: 20px;
+        }
+        .grocery-item {
+            background: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #2563eb;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .grocery-item h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        .grocery-item p {
+            margin: 0;
+            font-size: 1rem;
+            color: #cbd5e1;
+        }
+        .add-item {
+            margin-top: 30px;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        .add-item h2 {
+            color: #38bdf8;
+            font-size: 1.5rem;
+        }
+        .add-item form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .add-item label {
+            font-size: 1rem;
+            color: #cbd5e1;
+        }
+        .add-item select,
+        .add-item input,
+        .add-item button {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #2563eb;
+            background: #0f172a;
+            color: #f8fafc;
+        }
+        .add-item button {
+            background: linear-gradient(90deg, #2563eb, #1e3a8a);
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .add-item button:hover {
+            transform: scale(1.05);
+        }
+        footer {
+            background-color: #1e293b;
+            color: #94a3b8;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Farmer Dashboard</h1>
+    </header>
+    <nav>
+        <a href="/home">Home</a>
+        <a href="/local-ordering">Local Ordering</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact Us</a>
+    </nav>
+    <main>
+        <div class="content">
+            <h2>Welcome, {{ farmer.name }}</h2>
+            <p>Email: {{ farmer.email }}</p>
+            <p>Phone: {{ farmer.phone }}</p>
+            <p>Address: {{ farmer.address }}, {{ farmer.city }}, {{ farmer.state }}, {{ farmer.country }} - {{ farmer.zip }}</p>
+            
+            <div class="grocery-list">
+                <h2>Your Grocery Items</h2>
+                {% if grocery_items %}
+                    {% for item in grocery_items %}
+                        <div class="grocery-item">
+                            <div>
+                                <h3>{{ item.name }}</h3>
+                                <p>{{ item.quantity }} units</p>
+                                <p>{{ item.description }}</p>
+                            </div>
+                            <p>Price: ${{ item.price }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No grocery items found. Add some to start selling!</p>
+                {% endif %}
+            </div>
+
+            <div class="add-item">
+                <h2>Add New Item</h2>
+                <form action="/add-grocery-item/{{ farmer.id }}" method="POST">
+                    <label for="item">Select Item:</label>
+                    <select id="item" name="item" required>
+                        <option value="Apples">Apples</option>
+                        <option value="Oranges">Oranges</option>
+                        <option value="Banana">Banana</option>
+                        <option value="Chicken">Chicken</option>
+                        <option value="Grapes">Grapes</option>
+                    </select>
+
+                    <label for="description">Enter Description:</label>
+                    <input type="text" id="description" name="description" placeholder="Enter description" required>
+
+                    <label for="price">Enter Price:</label>
+                    <input type="number" id="price" name="price" min="0.01" step="0.01" placeholder="Enter price" required>
+
+                    <label for="quantity">Enter Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" min="1" placeholder="Enter quantity" required>
+
+                    <button type="submit">Add</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 Foodly. All rights reserved.</p>
+    </footer>
+</body>
+</html>

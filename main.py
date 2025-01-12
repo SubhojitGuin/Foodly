@@ -37,17 +37,57 @@ class Recipe(SQLModel, table=True):
     dietary_notes: str = None
     user_id: int = Field(default=None, foreign_key="user.id")
 
+class Farmer(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    password: str = None
+    name: str
+    email: str
+    phone: str
+    address: str
+    city: str
+    state: str
+    country: str
+    zip: str
+
 class GroceryItem(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     name: str
-    quantity: str = None
-    user_id: int
+    description: str
+    price: str
+    quantity: str
+    city: str
+    state: str
+    country: str
+    farmer_id: int = Field(default=None, foreign_key="farmer.id")
 
 class Contact(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     name: str
     email: str
     message: str
+
+class Order(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    user_id: int
+    order_status: str
+
+class OrderItem(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    order_id: int = Field(default=None, foreign_key="order.id")
+    grocery_item_id: int = Field(default=None, foreign_key="groceryitem.id")
+    quantity: str
+
+# class Cart(SQLModel, table=True):
+#     id: int = Field(default=None, primary_key=True)
+#     user_id: int = Field(default=None, foreign_key="user.id")
+
+# class CartItem(SQLModel, table=True):
+#     id: int = Field(default=None, primary_key=True)
+#     cart_id: int = Field(default=None, foreign_key="cart.id")
+#     grocery_item_id: int = Field(default=None, foreign_key="groceryitem.id")
+#     quantity: str
+
+CART = {}
 
 # Create database and tables
 SQLModel.metadata.create_all(engine)
@@ -79,10 +119,13 @@ async def login_user(request: Request):
     form_data = await request.form()
     username = form_data.get("username")
     password = form_data.get("password")
-    with Session(engine) as session:
-        user = session.exec(select(User).where(User.username == username)).first()
-        if user and user.password == password:
-            return RedirectResponse(url="/home", status_code=302)
+    try:
+        with Session(engine) as session:
+            user = session.exec(select(User).where(User.username == username)).first()
+            if user and user.password == password:
+                return RedirectResponse(url="/home", status_code=302)
+    except:
+        pass
     return templates.TemplateResponse(request=request, name="login.html", context={"response": "Invalid username or password"})
 
 @app.get("/signup")
@@ -261,6 +304,103 @@ async def recipe_sharing_blog(request: Request, recipe_id: int):
                 "dietary_notes": recipe.dietary_notes.replace("\n", "<br>"),
                 "author": user.username
             })
+        
+        return RedirectResponse(url="/recipe-sharing", status_code=302)
+    
+@app.get("/farmer-registration")
+async def farmer_registration(request: Request):
+    return templates.TemplateResponse(request=request, name="farmer-registration.html")
+
+@app.post("/farmer-registration")
+async def farmer_registration(request: Request):
+    form = await request.form()
+    name = form.get("name")
+    password = form.get("password")
+    email = form.get("email")
+    phone = form.get("phone")
+    address = form.get("address")
+    city = form.get("city")
+    state = form.get("state")
+    country = form.get("country")
+    zip = form.get("zip")
+    with Session(engine) as session:
+        farmer_exists = session.exec(select(Farmer).where(Farmer.email == email)).first()
+        if farmer_exists:
+            return templates.TemplateResponse(request=request, name="farmer-registration.html", context={"response": "Farmer already exists"})
+        
+        number_exists = session.exec(select(Farmer).where(Farmer.phone == phone)).first()
+        if number_exists:
+            return templates.TemplateResponse(request=request, name="farmer-registration.html", context={"response": "Phone number already exists"})
+
+        farmer = Farmer(name=name, password=password, email=email, phone=phone, address=address, city=city, state=state, country=country, zip=zip)
+        session.add(farmer)
+        session.commit()
+        session.refresh(farmer)
+
+    return RedirectResponse(url="/farmer-login", status_code=302)
+
+@app.get("/farmer-login")
+async def farmer_login(request: Request):
+    return templates.TemplateResponse(request=request, name="farmer-login.html")
+
+@app.post("/farmer-login")
+async def farmer_login(request: Request):
+    form = await request.form()
+    email = form.get("email")
+    password = form.get("password")
+    try:
+        with Session(engine) as session:
+            farmer = session.exec(select(Farmer).where(Farmer.email == email)).first()
+            if farmer and farmer.password == password:
+                return RedirectResponse(url=f"/farmer-dashboard/{farmer.id}", status_code=302)
+    except:
+        pass
+    return templates.TemplateResponse(request=request, name="farmer-login.html", context={"response": "Invalid email or password"})
+
+@app.get("/farmer-dashboard/{farmer_id}")
+async def farmer_dashboard(request: Request, farmer_id: int):
+    with Session(engine) as session:
+        farmer = session.exec(select(Farmer).where(Farmer.id == farmer_id)).first()
+        grocery_items = session.exec(select(GroceryItem).where(GroceryItem.farmer_id == farmer_id)).all()
+        if farmer:
+            return templates.TemplateResponse(request=request, name="farmer-dashboard.html", context={"farmer": farmer, "grocery_items": grocery_items})
+        return RedirectResponse(url="/farmer-login", status_code=302)
+    
+@app.post("/add-grocery-item/{farmer_id}")
+async def add_grocery_item(request: Request):
+    form = await request.form()
+    name = form.get("item")
+    description = form.get("description")
+    price = form.get("price")
+    quantity = form.get("quantity")
+    farmer_id = int(request.path_params["farmer_id"])
+    with Session(engine) as session:
+        city = session.exec(select(Farmer).where(Farmer.id == farmer_id)).first().city
+        state = session.exec(select(Farmer).where(Farmer.id == farmer_id)).first().state
+        country = session.exec(select(Farmer).where(Farmer.id == farmer_id)).first().country
+        grocery_item = GroceryItem(name=name, city=city, state=state, country=country, description=description, price=price, quantity=quantity, farmer_id=farmer_id)
+        session.add(grocery_item)
+        session.commit()
+        session.refresh(grocery_item)
+    return RedirectResponse(url=f"/farmer-dashboard/{farmer_id}", status_code=302)
+
+@app.get("/local-ordering")
+async def local_ordering():
+    index_path = os.path.join(frontend_path, "local-ordering.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path, media_type="text/html")
+    raise HTTPException(status_code=404, detail="Local Ordering file not found")
+
+@app.get("/search-grocery")
+async def search_grocery(request: Request, query: str, city: str, state: str, country: str):
+    with Session(engine) as session:
+        items = session.exec(select(GroceryItem).where(
+            GroceryItem.name.ilike(f"%{query}%"),
+            GroceryItem.city.ilike(f"%{city}%"),
+            GroceryItem.state.ilike(f"%{state}%"),
+            GroceryItem.country.ilike(f"%{country}%")
+        )).all()
+        return templates.TemplateResponse(request=request, name="search-grocery.html", context={"items": items})
 
 # Run the application
 if __name__ == "__main__":
