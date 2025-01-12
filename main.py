@@ -68,8 +68,11 @@ class Contact(SQLModel, table=True):
 
 class Order(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
-    user_id: int
+    user_id: int = Field(default=None, foreign_key="user.id")
     order_status: str
+    total: int = None
+    address: str
+    zip: str
 
 class OrderItem(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
@@ -401,6 +404,72 @@ async def search_grocery(request: Request, query: str, city: str, state: str, co
             GroceryItem.country.ilike(f"%{country}%")
         )).all()
         return templates.TemplateResponse(request=request, name="search-grocery.html", context={"items": items})
+    
+@app.post("/add-to-cart")
+async def add_to_cart(request: Request):
+    with Session(engine) as session:
+        form = await request.form()
+        item_id = int(form.get("item_id"))
+        quantity = form.get("quantity")
+        item = session.exec(select(GroceryItem).where(GroceryItem.id == item_id)).first()
+        if item:
+            CART[item_id] = {"name": item.name, "price": item.price, "quantity": quantity}
+            print(CART)
+            return RedirectResponse(url="/view-cart", status_code=302)
+        return RedirectResponse(url="/local-ordering", status_code=302)
+    
+@app.get("/view-cart")
+async def view_cart(request: Request):
+    total = 0
+    for item_id, item in CART.items():
+        CART[item_id]["total"] = int(item["price"]) * int(item["quantity"])
+        total += CART[item_id]["total"]
+    return templates.TemplateResponse(request=request, name="view-cart.html", context={"cart": CART, "total": total})
+
+@app.post("/confirm-order")
+async def confirm_order(request: Request):
+    with Session(engine) as session:
+        form = await request.form()
+        username = form.get("username")
+        address = form.get("address")
+        zip = form.get("zip")
+        user = session.exec(select(User).where(User.username == username)).first()
+        total = sum([int(item["total"]) for item in CART.values()])
+        order = Order(user_id=user.id, total=total, address=address, zip=zip, order_status="Pending")
+        session.add(order)
+        session.commit()
+        session.refresh(order)
+        for item_id, item in CART.items():
+            grocery_item = session.exec(select(GroceryItem).where(GroceryItem.id == item_id)).first()
+            grocery_item.quantity = str(int(grocery_item.quantity) - int(item["quantity"]))
+            if int(grocery_item.quantity) <= 0:
+                session.delete(grocery_item)
+            else:
+                session.add(grocery_item)
+            order_item = OrderItem(order_id=order.id, grocery_item_id=item_id, quantity=item["quantity"])
+            session.add(order_item)
+            session.commit()
+            session.refresh(order_item)
+        
+        CART.clear()
+        return templates.TemplateResponse(request=request, name="order-confirmation.html", context={"order_id": order.id})
+    
+@app.get("/order-tracking")
+async def order_tracking(request: Request):
+    return templates.TemplateResponse(request=request, name="order-tracking.html")
+
+@app.post("/order-tracking")
+async def order_status(request: Request):
+    form = await request.form()
+    order_id = form.get("order_id")
+    with Session(engine) as session:
+        order = session.exec(select(Order).where(Order.id == order_id)).first()
+        items = session.exec(select(OrderItem, GroceryItem).where(OrderItem.order_id == order_id).where(OrderItem.grocery_item_id == GroceryItem.id)).all()
+        item_details = [{"name": item.GroceryItem.name, "quantity": item.OrderItem.quantity} for item in items]
+        if order:
+            return templates.TemplateResponse(request=request, name="order-status.html", context={"order": order, "item_details": item_details})
+        return RedirectResponse(url="/order-tracking", status_code=302)
+    
 
 # Run the application
 if __name__ == "__main__":
