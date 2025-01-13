@@ -12,7 +12,7 @@ llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.75)
 
 def recipe_generator_rag(input_variables):
     prompt_template = """
-        Answer the following question in a detailed manner providing each and every step. Include all the necessary details. You must include the ingredients and its quantity, the cooking time, the cooking method, and any other relevant information. You may also include extra ingredients if you think it will enhance the recipe.
+        Answer the following question in a detailed manner providing each and every step. Include all the necessary details. You must include the recipe name, ingredients and its quantity, the cooking time, the cooking method, and any other relevant information. You may also include extra ingredients if you think it will enhance the recipe.
         Think step by step before providing an answer, and make sure to provide all the details.
         Always return the response in HTML body format.
         Always mention the ingredients along with their quantities. 
