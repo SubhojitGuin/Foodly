@@ -64,11 +64,12 @@ def meal_planning_rag(input_variables):
     prompt_template = """
         Always return the response in HTML body format.
         Always mention the ingredients along with their quantities. 
-        Use <h3> for headings. 
+        Use <h3> for meal headings.
+        Use <h2> for day headings. 
         Do not include ''', *, html, <html>, <body>, <li> tags in the response.
         Use <br> to differentiate the points.
 
-        Provide a meal planning based on the following factors:
+        Provide a meal planning for breakfast, lunch and dinner only for all 7 days of the week along with calories for each meal based on the following factors:
         
         Allergies/Intolerances: {allergies}
         

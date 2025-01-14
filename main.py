@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Form
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -70,7 +70,7 @@ class Order(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     user_id: int = Field(default=None, foreign_key="user.id")
     order_status: str
-    total: int = None
+    total: float = None
     address: str
     zip: str
 
@@ -80,6 +80,10 @@ class OrderItem(SQLModel, table=True):
     grocery_item_id: int = Field(default=None, foreign_key="groceryitem.id")
     quantity: str
 
+ADMIN = {
+    "username": "admin",
+    "password": "admin"
+}
 # class Cart(SQLModel, table=True):
 #     id: int = Field(default=None, primary_key=True)
 #     user_id: int = Field(default=None, foreign_key="user.id")
@@ -397,12 +401,20 @@ async def local_ordering():
 @app.get("/search-grocery")
 async def search_grocery(request: Request, query: str, city: str, state: str, country: str):
     with Session(engine) as session:
-        items = session.exec(select(GroceryItem).where(
-            GroceryItem.name.ilike(f"%{query}%"),
-            GroceryItem.city.ilike(f"%{city}%"),
-            GroceryItem.state.ilike(f"%{state}%"),
-            GroceryItem.country.ilike(f"%{country}%")
-        )).all()
+        if query == None:
+            items = session.exec(select(GroceryItem).where(
+                GroceryItem.city.ilike(f"%{city}%"),
+                GroceryItem.state.ilike(f"%{state}%"),
+                GroceryItem.country.ilike(f"%{country}%")
+            )).all()
+            return templates.TemplateResponse(request=request, name="search-grocery.html", context={"items": items})
+        else:
+            items = session.exec(select(GroceryItem).where(
+                GroceryItem.name.ilike(f"%{query}%"),
+                GroceryItem.city.ilike(f"%{city}%"),
+                GroceryItem.state.ilike(f"%{state}%"),
+                GroceryItem.country.ilike(f"%{country}%")
+            )).all()
         return templates.TemplateResponse(request=request, name="search-grocery.html", context={"items": items})
     
 @app.post("/add-to-cart")
@@ -422,7 +434,8 @@ async def add_to_cart(request: Request):
 async def view_cart(request: Request):
     total = 0
     for item_id, item in CART.items():
-        CART[item_id]["total"] = int(item["price"]) * int(item["quantity"])
+        # print(item)
+        CART[item_id]["total"] = round(float(item["price"]) * int(item["quantity"]), 2)
         total += CART[item_id]["total"]
     return templates.TemplateResponse(request=request, name="view-cart.html", context={"cart": CART, "total": total})
 
@@ -469,7 +482,44 @@ async def order_status(request: Request):
         if order:
             return templates.TemplateResponse(request=request, name="order-status.html", context={"order": order, "item_details": item_details})
         return RedirectResponse(url="/order-tracking", status_code=302)
-    
+
+@app.get("/admin-login")
+async def admin_login(request: Request):
+    return templates.TemplateResponse(request=request, name="admin-login.html", context={"response": ""})
+
+@app.post("/admin-login")
+async def admin_login(request: Request):
+    form = await request.form()
+    username = form.get("username")
+    password = form.get("password")
+    if username == ADMIN["username"] and password == ADMIN["password"]:
+        return RedirectResponse(url="/admin-dashboard", status_code=302)
+    return templates.TemplateResponse(request=request, name="admin-login.html", context={"response": "Invalid username or password"})
+
+@app.get("/admin")
+async def admin(request: Request):
+    return RedirectResponse(url="/admin-login", status_code=302)
+
+@app.get("/admin-dashboard")
+async def admin_dashboard(request: Request):
+    with Session(engine) as session:
+        orders = session.exec(select(Order)).all()
+        return templates.TemplateResponse("admin-dashboard.html", {
+            "request": request,
+            "orders": orders
+        })
+
+# Update order status
+@app.post("/update-order-status/{order_id}")
+async def update_order_status(order_id: int, order_status: str = Form(...)):
+    with Session(engine) as session:
+        order = session.get(Order, order_id)
+        if order:
+            order.order_status = order_status
+            session.add(order)
+            session.commit()
+    return RedirectResponse(url="/admin-dashboard", status_code=303)
+
 
 # Run the application
 if __name__ == "__main__":
